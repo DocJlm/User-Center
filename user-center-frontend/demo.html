@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户中心 - Vue版本</title>
+    <link rel="stylesheet" href="https://unpkg.com/antd@4.24.10/dist/antd.min.css">
+    <script src="https://unpkg.com/vue@3.3.4/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/antd@4.24.10/dist/antd.min.js"></script>
+    <script src="https://unpkg.com/axios@1.7.0/dist/axios.min.js"></script>
+    <style>
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .container { min-height: 100vh; }
+        .header { background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 0 24px; }
+        .header-content { display: flex; align-items: center; height: 64px; max-width: 1200px; margin: 0 auto; }
+        .logo { font-size: 20px; color: #1890ff; font-weight: 600; }
+        .header-actions { margin-left: auto; display: flex; gap: 16px; }
+        .content { padding: 40px 24px; background: #f0f2f5; }
+        .welcome-content { max-width: 1200px; margin: 0 auto; text-align: center; }
+        .feature-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 40px; }
+        .feature-card { background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .login-form { width: 100%; max-width: 400px; padding: 40px; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+        .logo-section { text-align: center; margin-bottom: 40px; }
+        .logo-section h1 { color: #1890ff; margin: 16px 0; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 登录页面 -->
+        <div v-if="currentPage === 'login'" class="login-container">
+            <div class="login-form">
+                <div class="logo-section">
+                    <h1>编程导航知识星球</h1>
+                    <p>最好的编程学习知识圈子</p>
+                </div>
+                <a-form @submit="handleLogin">
+                    <a-form-item>
+                        <a-input
+                            v-model:value="loginForm.userAccount"
+                            placeholder="请输入账号"
+                            size="large"
+                            style="margin-bottom: 16px;">
+                            <template #prefix>
+                                <a-icon type="user" />
+                            </template>
+                        </a-input>
+                    </a-form-item>
+                    <a-form-item>
+                        <a-input-password
+                            v-model:value="loginForm.userPassword"
+                            placeholder="请输入密码"
+                            size="large"
+                            style="margin-bottom: 16px;">
+                            <template #prefix>
+                                <a-icon type="lock" />
+                            </template>
+                        </a-input-password>
+                    </a-form-item>
+                    <a-form-item>
+                        <a-checkbox v-model:checked="loginForm.autoLogin">自动登录</a-checkbox>
+                        <a @click="currentPage = 'register'" style="float: right;">新用户注册</a>
+                    </a-form-item>
+                    <a-form-item>
+                        <a-button
+                            type="primary"
+                            html-type="submit"
+                            size="large"
+                            :loading="loading"
+                            block>
+                            登录
+                        </a-button>
+                    </a-form-item>
+                </a-form>
+            </div>
+        </div>
+
+        <!-- 注册页面 -->
+        <div v-else-if="currentPage === 'register'" class="login-container">
+            <div class="login-form">
+                <div class="logo-section">
+                    <h1>编程导航知识星球</h1>
+                    <p>最好的编程学习知识圈子</p>
+                </div>
+                <a-form @submit="handleRegister">
+                    <a-form-item>
+                        <a-input
+                            v-model:value="registerForm.userAccount"
+                            placeholder="请输入账号"
+                            size="large"
+                            style="margin-bottom: 16px;">
+                            <template #prefix>
+                                <a-icon type="user" />
+                            </template>
+                        </a-input>
+                    </a-form-item>
+                    <a-form-item>
+                        <a-input-password
+                            v-model:value="registerForm.userPassword"
+                            placeholder="请输入密码"
+                            size="large"
+                            style="margin-bottom: 16px;">
+                            <template #prefix>
+                                <a-icon type="lock" />
+                            </template>
+                        </a-input-password>
+                    </a-form-item>
+                    <a-form-item>
+                        <a-input-password
+                            v-model:value="registerForm.checkPassword"
+                            placeholder="请再次输入密码"
+                            size="large"
+                            style="margin-bottom: 16px;">
+                            <template #prefix>
+                                <a-icon type="lock" />
+                            </template>
+                        </a-input-password>
+                    </a-form-item>
+                    <a-form-item>
+                        <a-input
+                            v-model:value="registerForm.planetCode"
+                            placeholder="请输入星球编号"
+                            size="large"
+                            style="margin-bottom: 16px;">
+                            <template #prefix>
+                                <a-icon type="user" />
+                            </template>
+                        </a-input>
+                    </a-form-item>
+                    <a-form-item>
+                        <a @click="currentPage = 'login'" style="float: right;">已有账号？去登录</a>
+                    </a-form-item>
+                    <a-form-item>
+                        <a-button
+                            type="primary"
+                            html-type="submit"
+                            size="large"
+                            :loading="loading"
+                            block>
+                            注册
+                        </a-button>
+                    </a-form-item>
+                </a-form>
+            </div>
+        </div>
+
+        <!-- 主页面 -->
+        <div v-else class="container">
+            <a-layout>
+                <a-layout-header class="header">
+                    <div class="header-content">
+                        <div class="logo">用户中心</div>
+                        <div class="header-actions">
+                            <span v-if="currentUser">欢迎，{{ currentUser.username }}</span>
+                            <a-button v-if="currentUser" @click="handleLogout">退出登录</a-button>
+                            <template v-else>
+                                <a-button type="primary" @click="currentPage = 'login'">登录</a-button>
+                                <a-button @click="currentPage = 'register'">注册</a-button>
+                            </template>
+                        </div>
+                    </div>
+                </a-layout-header>
+
+                <a-layout-content class="content">
+                    <div class="welcome-content">
+                        <h2>欢迎使用用户中心</h2>
+                        <p>这是一个基于 Vue 3 + Ant Design Vue 构建的用户管理系统</p>
+
+                        <div class="feature-cards">
+                            <div class="feature-card">
+                                <h3>用户管理</h3>
+                                <p>管理用户信息，包括用户列表查看、用户搜索等功能</p>
+                                <a-button type="primary" @click="goToUserManage">进入管理</a-button>
+                            </div>
+
+                            <div class="feature-card">
+                                <h3>数据表格</h3>
+                                <p>查看数据表格，支持搜索、筛选、排序等功能</p>
+                                <a-button type="primary" @click="goToTableList">查看表格</a-button>
+                            </div>
+
+                            <div class="feature-card">
+                                <h3>个人中心</h3>
+                                <p>管理个人信息，修改密码，查看账户状态</p>
+                                <a-button type="primary" disabled>敬请期待</a-button>
+                            </div>
+                        </div>
+                    </div>
+                </a-layout-content>
+            </a-layout>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, reactive } = Vue;
+
+        createApp({
+            setup() {
+                const currentPage = ref('welcome');
+                const currentUser = ref(null);
+                const loading = ref(false);
+
+                const loginForm = reactive({
+                    userAccount: '',
+                    userPassword: '',
+                    autoLogin: true
+                });
+
+                const registerForm = reactive({
+                    userAccount: '',
+                    userPassword: '',
+                    checkPassword: '',
+                    planetCode: ''
+                });
+
+                const handleLogin = async () => {
+                    loading.value = true;
+                    try {
+                        // 模拟API调用
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+
+                        if (loginForm.userAccount && loginForm.userPassword) {
+                            currentUser.value = {
+                                username: loginForm.userAccount,
+                                userAccount: loginForm.userAccount,
+                                userRole: 1
+                            };
+                            currentPage.value = 'welcome';
+                            message.success('登录成功！');
+                        } else {
+                            message.error('请输入账号和密码');
+                        }
+                    } catch (error) {
+                        message.error('登录失败，请重试！');
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
+                const handleRegister = async () => {
+                    if (registerForm.userPassword !== registerForm.checkPassword) {
+                        message.error('两次输入的密码不一致');
+                        return;
+                    }
+
+                    loading.value = true;
+                    try {
+                        // 模拟API调用
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+
+                        if (registerForm.userAccount && registerForm.userPassword && registerForm.planetCode) {
+                            message.success('注册成功！');
+                            currentPage.value = 'login';
+                        } else {
+                            message.error('请填写完整信息');
+                        }
+                    } catch (error) {
+                        message.error('注册失败，请重试！');
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
+                const handleLogout = () => {
+                    currentUser.value = null;
+                    currentPage.value = 'login';
+                    message.success('已退出登录');
+                };
+
+                const goToUserManage = () => {
+                    if (!currentUser.value) {
+                        message.warning('请先登录');
+                        currentPage.value = 'login';
+                        return;
+                    }
+                    if (currentUser.value.userRole !== 1) {
+                        message.error('需要管理员权限');
+                        return;
+                    }
+                    message.info('进入用户管理页面');
+                };
+
+                const goToTableList = () => {
+                    message.info('进入数据表格页面');
+                };
+
+                return {
+                    currentPage,
+                    currentUser,
+                    loading,
+                    loginForm,
+                    registerForm,
+                    handleLogin,
+                    handleRegister,
+                    handleLogout,
+                    goToUserManage,
+                    goToTableList
+                };
+            }
+        }).use(antd).mount('#app');
+    </script>
+</body>
+</html>
